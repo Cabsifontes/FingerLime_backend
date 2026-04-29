@@ -22,16 +22,13 @@ exports.register = async (req, res) => {
   }
 };
 
-// LOGIN
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { nombre, password } = req.body;
 
-    // Verificar email
-    const user = await User.findOne({ nombre: email });
+    const user = await User.findOne({ nombre });
     if (!user) return res.status(400).json({ msg: "Credenziali non valide" });
 
-    // Verificar password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
       return res.status(400).json({ msg: "Credenziali non valide" });
