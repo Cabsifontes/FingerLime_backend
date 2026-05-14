@@ -33,4 +33,39 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.get("/:userId/favorites", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId).populate("favoritos");
+    res.json(user.favoritos || []);
+  } catch (err) {
+    res.status(500).send("Errore en el servidor");
+  }
+});
+
+router.post("/:userId/favorites", async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.userId,
+      { $addToSet: { favoritos: req.body.productId } },
+      { new: true },
+    );
+    res.json(user.favoritos);
+  } catch (err) {
+    res.status(500).send("Errore aggiungendo preferito");
+  }
+});
+
+router.delete("/:userId/favorites/:productId", async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.userId,
+      { $pull: { favoritos: req.params.productId } },
+      { new: true },
+    );
+    res.json(user.favoritos);
+  } catch (err) {
+    res.status(500).send("Errore eliminando preferito");
+  }
+});
+
 module.exports = router;
