@@ -4,18 +4,30 @@ exports.getCart = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    let cart = await Cart.findOne({
-      user: userId,
-    }).populate("items.product");
+    let cart = await Cart.findOne({ user: userId }).populate("items.product");
 
     if (!cart) {
-      cart = await Cart.create({
-        user: userId,
-        items: [],
-      });
+      cart = await Cart.create({ user: userId, items: [] });
     }
 
-    res.status(200).json(cart);
+    const formattedCart = {
+      ...cart._doc,
+      items: cart.items.map((item) => ({
+        product: item.product
+          ? {
+              _id: item.product._id,
+              nombre: item.product.nombre,
+              precio: item.product.precio,
+              imagen: item.product.imagen,
+              descripcion: item.product.descripcion,
+              stock: item.product.stock,
+            }
+          : null,
+        cantidad: item.cantidad,
+      })),
+    };
+
+    res.status(200).json(formattedCart);
   } catch (error) {
     console.error(error);
 
@@ -31,19 +43,12 @@ exports.addItemToCart = async (req, res) => {
 
     const { productId, quantity } = req.body;
 
-    let cart = await Cart.findOne({
-      user: userId,
-    });
+    let cart = await Cart.findOne({ user: userId });
 
     if (!cart) {
       cart = await Cart.create({
         user: userId,
-        items: [
-          {
-            product: productId,
-            cantidad: quantity,
-          },
-        ],
+        items: [{ product: productId, cantidad: quantity }],
       });
 
       const populatedCart = await cart.populate("items.product");
@@ -63,10 +68,7 @@ exports.addItemToCart = async (req, res) => {
       }
     } else {
       if (quantity > 0) {
-        cart.items.push({
-          product: productId,
-          cantidad: quantity,
-        });
+        cart.items.push({ product: productId, cantidad: quantity });
       }
     }
 
@@ -88,13 +90,10 @@ exports.clearCart = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const cart = await Cart.findOne({
-      user: userId,
-    });
+    const cart = await Cart.findOne({ user: userId });
 
     if (cart) {
       cart.items = [];
-
       await cart.save();
     }
 
