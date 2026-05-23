@@ -25,7 +25,7 @@ const OrderSchema = new mongoose.Schema(
     total: { type: Number, required: true },
     paymentMethod: {
       type: String,
-      enum: ["Stripe", "Bonifico", "Contrassegno"],
+      enum: ["stripe", "bonifico", "contrassegno"],
       required: true,
     },
     status: {
