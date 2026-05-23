@@ -20,7 +20,12 @@ exports.createOrder = async (req, res) => {
 
     res.status(201).json(newOrder);
   } catch (error) {
-    res.status(500).json({ message: "Errore nel server" });
+    console.error(error);
+
+    res.status(500).json({
+      message: "Errore nel server",
+      error: error.message,
+    });
   }
 };
 
@@ -34,6 +39,11 @@ exports.getUserOrders = async (req, res) => {
 
     res.status(200).json(orders);
   } catch (error) {
-    res.status(500).json({ message: "Errore nel server" });
+    console.error(error);
+
+    res.status(500).json({
+      message: "Errore nel server",
+      error: error.message,
+    });
   }
 };
